@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import MarkdownIt from 'markdown-it';
 import MdEditor from 'react-markdown-editor-lite';
@@ -12,8 +12,8 @@ const App = () => {
   const [notes, setNotes] = useState([]);
   const [note, setNote] = useState({ title: '', content: '' });
   const [notification, setNotification] = useState('');
+  const [error, setError] = useState('');
   const [selectedNote, setSelectedNote] = useState(null);
-  const editorRef = useRef();
 
   useEffect(() => {
     axios.get('http://localhost:3001/notes')
@@ -25,19 +25,12 @@ const App = () => {
     setNote(prevNote => ({ ...prevNote, content: text }));
   };
 
-  const formatText = (syntax) => {
-    const editor = editorRef.current.getTextareaDom();
-    const { selectionStart, selectionEnd } = editor;
-
-    const selectedText = note.content.slice(selectionStart, selectionEnd);
-    const beforeText = note.content.slice(0, selectionStart);
-    const afterText = note.content.slice(selectionEnd);
-
-    const newText = `${beforeText}${syntax}${selectedText}${syntax}${afterText}`;
-    setNote(prevNote => ({ ...prevNote, content: newText }));
-  };
-
   const addNote = () => {
+    if (!note.title.trim()) {
+      setError('Title cannot be empty.');
+      return;
+    }
+
     axios.post('http://localhost:3001/notes', note)
       .then(response => {
         const newNote = response.data;
@@ -45,16 +38,23 @@ const App = () => {
         setNotification(`Note "${newNote.title}" added to your memories`);
         setTimeout(() => setNotification(''), 3000);
         setNote({ title: '', content: '' });
+        setError('');
       })
       .catch(error => console.error(error));
   };
 
   const updateNote = (id) => {
+    if (!note.title.trim()) {
+      setError('Title cannot be empty.');
+      return;
+    }
+
     axios.put(`http://localhost:3001/notes/${id}`, note)
       .then(response => {
         setNotes(prevNotes => prevNotes.map(n => n.id === id ? response.data : n));
         setSelectedNote(response.data);
         setNote({ title: '', content: '' });
+        setError('');
       })
       .catch(error => console.error(error));
   };
@@ -90,22 +90,14 @@ const App = () => {
       <div className="main">
         <h1>Notepad App</h1>
         {notification && <div className="notification">{notification}</div>}
+        {error && <div className="error">{error}</div>}
         <input
           type="text"
           value={note.title}
           onChange={e => setNote({ ...note, title: e.target.value })}
           placeholder="Title"
         />
-        <div className="toolbar">
-          <button onClick={() => formatText('**')}><b>Bold</b></button>
-          <button onClick={() => formatText('*')}><i>Italic</i></button>
-          <button onClick={() => formatText('~~')}><s>Strikethrough</s></button>
-          <button onClick={() => formatText('`')}>Code</button>
-          <button onClick={() => formatText('>')}>Quote</button>
-          <button onClick={() => formatText('- ')}>Bullet List</button>
-        </div>
         <MdEditor
-          ref={editorRef}
           value={note.content}
           style={{ height: '400px' }}
           renderHTML={text => mdParser.render(text)}
