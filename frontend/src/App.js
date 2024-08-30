@@ -38,6 +38,7 @@ const App = () => {
         setNotification(`Note "${newNote.title}" added to your memories`);
         setTimeout(() => setNotification(''), 3000);
         setNote({ title: '', content: '' });
+        setSelectedNote(newNote);
         setError('');
       })
       .catch(error => console.error(error));
@@ -53,7 +54,8 @@ const App = () => {
       .then(response => {
         setNotes(prevNotes => prevNotes.map(n => n.id === id ? response.data : n));
         setSelectedNote(response.data);
-        setNote({ title: '', content: '' });
+        setNotification('Note updated successfully');
+        setTimeout(() => setNotification(''), 3000);
         setError('');
       })
       .catch(error => console.error(error));
@@ -61,7 +63,15 @@ const App = () => {
 
   const deleteNote = (id) => {
     axios.delete(`http://localhost:3001/notes/${id}`)
-      .then(() => setNotes(prevNotes => prevNotes.filter(n => n.id !== id)))
+      .then(() => {
+        setNotes(prevNotes => prevNotes.filter(n => n.id !== id));
+        if (selectedNote && selectedNote.id === id) {
+          setSelectedNote(null);
+          setNote({ title: '', content: '' });
+        }
+        setNotification('Note deleted successfully');
+        setTimeout(() => setNotification(''), 3000);
+      })
       .catch(error => console.error(error));
   };
 
@@ -75,10 +85,18 @@ const App = () => {
     setNote(note);
   };
 
+  const createNewNote = () => {
+    setSelectedNote(null);
+    setNote({ title: '', content: '' });
+  };
+
   return (
     <div className="app">
       <div className="sidebar">
         <h2>Notes</h2>
+        <button className="new-note-button" onClick={createNewNote}>
+          New Note
+        </button>
         <ul>
           {notes.map(note => (
             <li key={note.id} onClick={() => selectNote(note)}>
