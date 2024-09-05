@@ -1,21 +1,23 @@
-// backend/models/note.js
-const { Sequelize, DataTypes } = require('sequelize');
-const sequelize = new Sequelize('postgres://localhost:5432/notepad', {
-  dialect: 'postgres',
-  logging: false // Disable logging
-});
+const mongoose = require('mongoose');
 
-const Note = sequelize.define('Note', {
+const NoteSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   title: {
-    type: DataTypes.STRING,
-    allowNull: false
+    type: String,
+    required: true
   },
   content: {
-    type: DataTypes.TEXT,
-    allowNull: false
+    type: String,
+    required: true
+  },
+  date: {
+    type: Date,
+    default: Date.now
   }
 });
 
-sequelize.sync();
-
-module.exports = Note;
+module.exports = mongoose.model('Note', NoteSchema);
