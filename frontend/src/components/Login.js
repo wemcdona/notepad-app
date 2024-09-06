@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Updated import
+import { useNavigate, Link } from 'react-router-dom';
 
 const Login = ({ setAuthToken }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate(); // Updated
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,7 +17,7 @@ const Login = ({ setAuthToken }) => {
       });
       localStorage.setItem('token', response.data.token);
       setAuthToken(response.data.token);
-      navigate('/'); // Updated
+      navigate('/app');
     } catch (err) {
       setError('Invalid credentials');
     }
@@ -25,7 +25,7 @@ const Login = ({ setAuthToken }) => {
 
   return (
     <div>
-      <h2>Login</h2>
+      <h2>Log In</h2>
       {error && <p>{error}</p>}
       <form onSubmit={handleSubmit}>
         <div>
@@ -46,8 +46,9 @@ const Login = ({ setAuthToken }) => {
             required
           />
         </div>
-        <button type="submit">Login</button>
+        <button type="submit">Log In</button>
       </form>
+      <p>Don't have an account? <Link to="/register">Sign Up</Link></p>
     </div>
   );
 };

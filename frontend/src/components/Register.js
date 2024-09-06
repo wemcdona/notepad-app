@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Updated import
+import { useNavigate, Link } from 'react-router-dom';
 
 const Register = ({ setAuthToken }) => {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate(); // Updated
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,7 +19,7 @@ const Register = ({ setAuthToken }) => {
       });
       localStorage.setItem('token', response.data.token);
       setAuthToken(response.data.token);
-      navigate('/'); // Updated
+      navigate('/app');
     } catch (err) {
       setError('Registration failed');
     }
@@ -27,7 +27,7 @@ const Register = ({ setAuthToken }) => {
 
   return (
     <div>
-      <h2>Register</h2>
+      <h2>Sign Up</h2>
       {error && <p>{error}</p>}
       <form onSubmit={handleSubmit}>
         <div>
@@ -57,8 +57,9 @@ const Register = ({ setAuthToken }) => {
             required
           />
         </div>
-        <button type="submit">Register</button>
+        <button type="submit">Sign Up</button>
       </form>
+      <p>Already have an account? <Link to="/login">Log In</Link></p>
     </div>
   );
 };
