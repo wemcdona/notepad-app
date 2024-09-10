@@ -12,6 +12,7 @@ const Register = ({ setAuthToken }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log('Registering with:', { email, username, password }); // Logging data before sending
       const response = await axios.post('http://localhost:3001/api/auth/register', {
         email,
         username,
@@ -21,7 +22,8 @@ const Register = ({ setAuthToken }) => {
       setAuthToken(response.data.token);
       navigate('/app');
     } catch (err) {
-      setError('Registration failed');
+      console.error('Registration error:', err.response?.data?.message || err.message);
+      setError(err.response?.data?.message || 'Registration failed');
     }
   };
 
