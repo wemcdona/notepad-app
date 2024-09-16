@@ -11,12 +11,35 @@ const Register = ({ setAuthToken }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Trim input values to remove spaces before and after
+    const trimmedEmail = email.trim();
+    const trimmedUsername = username.trim();
+    const trimmedPassword = password.trim();
+
+    // Username and password validation patterns
+    const usernamePattern = /^[a-zA-Z0-9]+$/;  // Only letters and numbers
+    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;  // Password must contain lowercase, uppercase, number, special character
+
+    // Validate the fields
+    if (!trimmedEmail || !trimmedUsername || !trimmedPassword) {
+      setError('All fields are required.');
+      return;
+    }
+    if (!usernamePattern.test(trimmedUsername)) {
+      setError('Username can only contain letters and numbers.');
+      return;
+    }
+    if (!passwordPattern.test(trimmedPassword)) {
+      setError('Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character.');
+      return;
+    }
+
     try {
-      console.log('Registering with:', { email, username, password }); // Logging data before sending
       const response = await axios.post('http://localhost:3001/api/auth/register', {
-        email,
-        username,
-        password,
+        email: trimmedEmail,
+        username: trimmedUsername,
+        password: trimmedPassword,
       });
       localStorage.setItem('token', response.data.token);
       setAuthToken(response.data.token);
@@ -30,7 +53,7 @@ const Register = ({ setAuthToken }) => {
   return (
     <div>
       <h2>Sign Up</h2>
-      {error && <p>{error}</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
       <form onSubmit={handleSubmit}>
         <div>
           <label>Email:</label>

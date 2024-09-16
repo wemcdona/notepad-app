@@ -15,6 +15,17 @@ const NoteApp = () => {
   const [error, setError] = useState('');
   const [selectedNote, setSelectedNote] = useState(null);
 
+  // Ensure token is set in axios headers
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      axios.defaults.headers.common['x-auth-token'] = token;
+    } else {
+      delete axios.defaults.headers.common['x-auth-token'];
+    }
+  }, []);
+
+  // Fetch notes on component mount
   useEffect(() => {
     axios.get('http://localhost:3001/api/notes')
       .then(response => setNotes(response.data))
@@ -26,8 +37,8 @@ const NoteApp = () => {
   };
 
   const addNote = () => {
-    if (!note.title.trim()) {
-      setError('Title cannot be empty.');
+    if (!note.title.trim() || !note.content.trim()) {
+      setError('Title and content cannot be empty.');
       return;
     }
 
@@ -41,7 +52,10 @@ const NoteApp = () => {
         setSelectedNote(newNote);
         setError('');
       })
-      .catch(error => console.error(error));
+      .catch(error => {
+        console.error('Error adding note:', error);
+        setError('Failed to add note');
+      });
   };
 
   const updateNote = (id) => {
@@ -58,7 +72,10 @@ const NoteApp = () => {
         setTimeout(() => setNotification(''), 3000);
         setError('');
       })
-      .catch(error => console.error(error));
+      .catch(error => {
+        console.error('Error updating note:', error);
+        setError('Failed to update note');
+      });
   };
 
   const deleteNote = (id) => {
@@ -72,7 +89,10 @@ const NoteApp = () => {
         setNotification('Note deleted successfully');
         setTimeout(() => setNotification(''), 3000);
       })
-      .catch(error => console.error(error));
+      .catch(error => {
+        console.error('Error deleting note:', error);
+        setError('Failed to delete note');
+      });
   };
 
   const editNote = (note) => {

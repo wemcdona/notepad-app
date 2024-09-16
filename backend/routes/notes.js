@@ -8,6 +8,11 @@ router.post('/notes', auth, async (req, res) => {
   const { title, content } = req.body;
   const userId = req.user.id;
 
+  // Validate input
+  if (!title || !content) {
+    return res.status(400).json({ message: 'Title and content are required' });
+  }
+
   try {
     const insertNoteQuery = `
       INSERT INTO notes (user_id, title, content) 
@@ -26,7 +31,7 @@ router.get('/notes', auth, async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const getNotesQuery = `SELECT * FROM notes WHERE user_id = $1`;
+    const getNotesQuery = `SELECT * FROM notes WHERE user_id = $1 ORDER BY date DESC`;
     const notesResult = await pool.query(getNotesQuery, [userId]);
 
     res.json(notesResult.rows);
@@ -42,6 +47,11 @@ router.put('/notes/:id', auth, async (req, res) => {
   const noteId = req.params.id;
   const userId = req.user.id;
 
+  // Validate input
+  if (!title || !content) {
+    return res.status(400).json({ message: 'Title and content are required' });
+  }
+
   try {
     const updateNoteQuery = `
       UPDATE notes SET title = $1, content = $2 
@@ -49,7 +59,7 @@ router.put('/notes/:id', auth, async (req, res) => {
     const updatedNoteResult = await pool.query(updateNoteQuery, [title, content, noteId, userId]);
 
     if (updatedNoteResult.rows.length === 0) {
-      return res.status(404).json({ message: 'Note not found' });
+      return res.status(404).json({ message: 'Note not found or you do not have permission to update this note' });
     }
 
     res.json(updatedNoteResult.rows[0]);
@@ -69,7 +79,7 @@ router.delete('/notes/:id', auth, async (req, res) => {
     const deleteNoteResult = await pool.query(deleteNoteQuery, [noteId, userId]);
 
     if (deleteNoteResult.rows.length === 0) {
-      return res.status(404).json({ message: 'Note not found' });
+      return res.status(404).json({ message: 'Note not found or you do not have permission to delete this note' });
     }
 
     res.json({ message: 'Note deleted successfully' });
