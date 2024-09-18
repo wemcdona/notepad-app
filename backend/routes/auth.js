@@ -10,43 +10,44 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
 router.post('/register', async (req, res) => {
   let { email, username, password } = req.body;
 
-  // Trim input values to avoid spaces before/after
+  // Trim input values
   email = email.trim();
   username = username.trim();
   password = password.trim();
 
-  // Username and password validation patterns
-  const usernamePattern = /^[a-zA-Z0-9]+$/;  // Only letters and numbers
-  const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;  // Password requirements
+  // Regex for username and password validation (with size limits)
+  const usernamePattern = /^[a-zA-Z0-9]{3,20}$/;
+  const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/;
 
   // Validate inputs
   if (!email || !username || !password) {
     return res.status(400).json({ message: 'Email, username, and password are required.' });
   }
   if (!usernamePattern.test(username)) {
-    return res.status(400).json({ message: 'Username can only contain letters and numbers.' });
+    return res.status(400).json({ message: 'Username must be 3 to 20 characters long and contain only letters and numbers.' });
   }
   if (!passwordPattern.test(password)) {
-    return res.status(400).json({ message: 'Password must be at least 8 characters long, and include an uppercase letter, lowercase letter, number, and special character.' });
+    return res.status(400).json({ message: 'Password must be 8 to 50 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.' });
   }
 
   try {
-    // Check if email already exists
+    // Check if the user already exists by email
     let user = await User.findOne({ where: { email } });
     if (user) {
       return res.status(400).json({ message: 'Email is already registered' });
     }
 
-    // Check if username already exists
+    // Check if the user already exists by username
     user = await User.findOne({ where: { username } });
     if (user) {
       return res.status(400).json({ message: 'Username is already taken' });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Generate a salt and hash the password (salt + hash)
+    const salt = await bcrypt.genSalt(10); // Generate salt with a cost factor of 10
+    const hashedPassword = await bcrypt.hash(password, salt); // Salt and hash the password
 
-    // Create new user
+    // Create a new user with the salted-hashed password
     const newUser = await User.create({
       email,
       username,
@@ -69,21 +70,23 @@ router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const userQuery = 'SELECT * FROM users WHERE email = $1';
-    const userResult = await pool.query(userQuery, [email]);
-
-    if (userResult.rows.length === 0) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+    // Find user by email
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid email or password.' });
     }
 
-    const user = userResult.rows[0];
+    // Compare entered password with the hashed password in the database
     const isMatch = await bcrypt.compare(password, user.password);
-
     if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      return res.status(400).json({ message: 'Invalid email or password.' });
     }
 
-    const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '1h' });
+    // Generate a new token and return it to the client
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+      expiresIn: '1h',
+    });
+
     res.json({ token, user: { id: user.id, username: user.username, email: user.email } });
   } catch (error) {
     console.error('Error during login:', error.message);

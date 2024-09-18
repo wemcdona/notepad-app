@@ -18,22 +18,23 @@ const Register = ({ setAuthToken }) => {
     const trimmedPassword = password.trim();
 
     // Username and password validation patterns
-    const usernamePattern = /^[a-zA-Z0-9]+$/;  // Only letters and numbers
-    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;  // Password must contain lowercase, uppercase, number, special character
+const usernamePattern = /^[a-zA-Z0-9]{3,20}$/;  // Only letters and numbers, length 3 to 20
+const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/;  // Password requirements, length 8 to 50
 
-    // Validate the fields
-    if (!trimmedEmail || !trimmedUsername || !trimmedPassword) {
-      setError('All fields are required.');
-      return;
-    }
-    if (!usernamePattern.test(trimmedUsername)) {
-      setError('Username can only contain letters and numbers.');
-      return;
-    }
-    if (!passwordPattern.test(trimmedPassword)) {
-      setError('Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character.');
-      return;
-    }
+
+   // Validate the fields
+if (!trimmedEmail || !trimmedUsername || !trimmedPassword) {
+  setError('All fields are required.');
+  return;
+}
+if (!usernamePattern.test(trimmedUsername)) {
+  setError('Username must be 3 to 20 characters long and contain only letters and numbers.');
+  return;
+}
+if (!passwordPattern.test(trimmedPassword)) {
+  setError('Password must be 8 to 50 characters long, contain uppercase, lowercase, number, and special character.');
+  return;
+}
 
     try {
       const response = await axios.post('http://localhost:3001/api/auth/register', {

@@ -1,70 +1,66 @@
-# Getting Started with Create React App
+# Notepad Application
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Overview
 
-## Available Scripts
+This Notepad application is designed for users to create, update, and manage personal notes. It provides an easy-to-use interface, strong user authentication, and an emphasis on security as a core feature. Users can sign up, log in, and securely store their notes, which are linked to their personal accounts.
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+- **User Authentication**: Secure user registration and login using hashed passwords (bcrypt) and JWT tokens.
+- **Create, Read, Update, and Delete (CRUD) Notes**: Users can create, edit, view, and delete their personal notes.
+- **Markdown Support**: Supports markdown formatting for note content, allowing users to format text.
+- **Enhanced Security**: The app places a strong emphasis on security, incorporating various measures to protect user data.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Tech Stack
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **Backend**: Node.js, Express, PostgreSQL, Sequelize ORM.
+- **Frontend**: React, Axios, React Router.
+- **Security Features**: Helmet, express-rate-limit, bcryptjs, JWT (JSON Web Tokens).
 
-### `npm test`
+## Security Features (Big Focus)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 1. **Helmet Middleware for Securing HTTP Headers**
 
-### `npm run build`
+The application uses [Helmet](https://github.com/helmetjs/helmet) to enhance security by setting a variety of HTTP headers that protect the app from common web vulnerabilities such as cross-site scripting (XSS), clickjacking, and other attacks.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- **XSS Protection**: Helmet enables X-XSS-Protection, which helps prevent XSS attacks by sanitizing the browser's response.
+- **Content Security Policy**: You can customize Helmet’s Content Security Policy (CSP) to prevent unauthorized scripts from running on your site.
+- **Strict Transport Security**: Helmet enforces HSTS headers to ensure the app is only accessible over HTTPS.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```javascript
+const helmet = require('helmet');
+app.use(helmet());
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 2. Rate Limiting with express-rate-limit
 
-### `npm run eject`
+The app incorporates rate limiting using [express-rate-limit](https://github.com/nfriedly/express-rate-limit) to mitigate brute force attacks, distributed denial-of-service (DDoS) attacks, and abusive usage. This feature ensures that users can only make a certain number of requests in a defined period.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- **Global Rate Limiting**: Limits the number of requests from each IP address to 100 requests per 15 minutes.
+- **Login Protection**: Stricter rate limiting is applied to sensitive routes like `/login` to prevent brute force attacks on user accounts.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 3. Password Hashing with bcrypt
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+User passwords are never stored in plain text. The app uses [bcryptjs](https://www.npmjs.com/package/bcryptjs) to securely hash passwords before storing them in the database. This ensures that even if the database is compromised, user passwords remain secure.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 4. Authentication with JWT (JSON Web Tokens)
 
-## Learn More
+User sessions are managed with JWT tokens, which are securely signed using a secret key. JWT tokens are stored client-side and sent with each request to verify the user's identity.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 5. Environment Variables with dotenv
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Sensitive information such as the JWT secret, database credentials, and other configuration settings are stored securely in environment variables using [dotenv](https://www.npmjs.com/package/dotenv). This ensures that these values are not hard-coded into the app's source code.
 
-### Code Splitting
+## 6. CORS (Cross-Origin Resource Sharing)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+To ensure that only requests from allowed origins can interact with the API, the app uses the [cors](https://www.npmjs.com/package/cors) middleware, which helps prevent unauthorized cross-origin requests from untrusted sources.
 
-### Analyzing the Bundle Size
+## How It Works
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### User Registration & Authentication
+Users sign up with a unique email, username, and password. Passwords are hashed before being stored in the PostgreSQL database. Upon logging in, users receive a JWT token, which they can use to authenticate their session.
 
-### Making a Progressive Web App
+### Secure Note Management
+Each note is tied to a specific user account, ensuring that notes are only accessible to the authenticated user. Notes are stored securely in a PostgreSQL database and can be created, updated, or deleted via the app's interface.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Security Focus
+The app places a strong emphasis on securing user data and limiting access to the API. Security features such as HTTP headers, rate limiting, password hashing, and token-based authentication are integral to the app's design.
