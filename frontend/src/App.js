@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Route, Routes, Link, useNavigate } from 'react-router-dom';  // Removed BrowserRouter
+import { Route, Routes, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Home from './components/Home';
 import Login from './components/Login';

@@ -1,8 +1,8 @@
-const pool = require('./db');
+const client = require('./db');  // Import client instead of pool
 
 const setupDatabase = async () => {
   try {
-    await pool.query(`
+    await client.query(`
       -- Users Table
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -24,7 +24,7 @@ const setupDatabase = async () => {
   } catch (error) {
     console.error('Error creating tables:', error);
   } finally {
-    pool.end();
+    client.end();  // Close the client connection
   }
 };
 

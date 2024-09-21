@@ -1,23 +1,28 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../db'); // Assuming db.js exports the Sequelize instance
 
-const NoteSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+const Note = sequelize.define('Note', {
+  // Foreign key for the user
+  user_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'users', // Name of the users table
+      key: 'id',
+    },
+    allowNull: false,
   },
   title: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   content: {
-    type: String,
-    required: true
+    type: DataTypes.TEXT,
+    allowNull: false,
   },
   date: {
-    type: Date,
-    default: Date.now
-  }
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW, // Default to the current date and time
+  },
 });
 
-module.exports = mongoose.model('Note', NoteSchema);
+module.exports = Note;

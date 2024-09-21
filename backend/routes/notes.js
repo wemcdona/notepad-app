@@ -1,5 +1,5 @@
 const express = require('express');
-const pool = require('../db');
+const client = require('../db');  // PostgreSQL client
 const auth = require('../middleware/auth');
 const router = express.Router();
 
@@ -8,17 +8,9 @@ router.post('/notes', auth, async (req, res) => {
   const { title, content } = req.body;
   const userId = req.user.id;
 
-  // Validate input
-  if (!title || !content) {
-    return res.status(400).json({ message: 'Title and content are required' });
-  }
-
   try {
-    const insertNoteQuery = `
-      INSERT INTO notes (user_id, title, content) 
-      VALUES ($1, $2, $3) RETURNING *`;
-    const newNoteResult = await pool.query(insertNoteQuery, [userId, title, content]);
-
+    const insertNoteQuery = `INSERT INTO notes (user_id, title, content) VALUES ($1, $2, $3) RETURNING *`;
+    const newNoteResult = await client.query(insertNoteQuery, [userId, title, content]);
     res.json(newNoteResult.rows[0]);
   } catch (error) {
     console.error('Error creating note:', error.message);
@@ -31,9 +23,8 @@ router.get('/notes', auth, async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const getNotesQuery = `SELECT * FROM notes WHERE user_id = $1 ORDER BY date DESC`;
-    const notesResult = await pool.query(getNotesQuery, [userId]);
-
+    const getNotesQuery = `SELECT * FROM notes WHERE user_id = $1`;
+    const notesResult = await client.query(getNotesQuery, [userId]);
     res.json(notesResult.rows);
   } catch (error) {
     console.error('Error fetching notes:', error.message);
@@ -47,19 +38,14 @@ router.put('/notes/:id', auth, async (req, res) => {
   const noteId = req.params.id;
   const userId = req.user.id;
 
-  // Validate input
-  if (!title || !content) {
-    return res.status(400).json({ message: 'Title and content are required' });
-  }
-
   try {
     const updateNoteQuery = `
       UPDATE notes SET title = $1, content = $2 
       WHERE id = $3 AND user_id = $4 RETURNING *`;
-    const updatedNoteResult = await pool.query(updateNoteQuery, [title, content, noteId, userId]);
+    const updatedNoteResult = await client.query(updateNoteQuery, [title, content, noteId, userId]);
 
     if (updatedNoteResult.rows.length === 0) {
-      return res.status(404).json({ message: 'Note not found or you do not have permission to update this note' });
+      return res.status(404).json({ message: 'Note not found' });
     }
 
     res.json(updatedNoteResult.rows[0]);
@@ -76,10 +62,10 @@ router.delete('/notes/:id', auth, async (req, res) => {
 
   try {
     const deleteNoteQuery = `DELETE FROM notes WHERE id = $1 AND user_id = $2 RETURNING *`;
-    const deleteNoteResult = await pool.query(deleteNoteQuery, [noteId, userId]);
+    const deleteNoteResult = await client.query(deleteNoteQuery, [noteId, userId]);
 
     if (deleteNoteResult.rows.length === 0) {
-      return res.status(404).json({ message: 'Note not found or you do not have permission to delete this note' });
+      return res.status(404).json({ message: 'Note not found' });
     }
 
     res.json({ message: 'Note deleted successfully' });
