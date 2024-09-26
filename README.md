@@ -54,6 +54,14 @@ Sensitive information such as the JWT secret, database credentials, and other co
 
 To ensure that only requests from allowed origins can interact with the API, the app uses the [cors](https://www.npmjs.com/package/cors) middleware, which helps prevent unauthorized cross-origin requests from untrusted sources.
 
+## 7. Honeypot for Bot Detection
+To prevent automated bots from spamming or registering accounts, the app implements a **honeypot** technique. This method involves adding a hidden field in user-facing forms (such as registration and login) that normal users will not fill in, but bots might.
+
+ - A hidden input field is added to forms like registration.
+  - If the hidden field is filled out, the backend identifies it as a bot and blocks the submission.
+  - Since human users cannot see this field, they will never fill it out, making this a simple yet effective bot detection technique.
+
+
 ## How It Works
 
 ### User Registration & Authentication
