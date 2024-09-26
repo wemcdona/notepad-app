@@ -6,7 +6,11 @@ import 'react-markdown-editor-lite/lib/index.css';
 import ReactMarkdown from 'react-markdown';
 import '../App.css';
 
-const mdParser = new MarkdownIt();
+// const mdParser = new MarkdownIt();
+const mdParser = new MarkdownIt({
+  html: true,  // Enable HTML parsing in markdown
+});
+
 
 const NoteApp = () => {
   const [notes, setNotes] = useState([]);
@@ -149,10 +153,11 @@ const NoteApp = () => {
             <button onClick={() => deleteNote(selectedNote.id)}>Delete Note</button>
           </div>
         )}
-        <div className="preview">
-          <h2>Preview</h2>
-          <ReactMarkdown>{note.content}</ReactMarkdown>
-        </div>
+       <div className="preview">
+  <h2>Preview</h2>
+  <ReactMarkdown components={{ html: true }}>{note.content}</ReactMarkdown>
+</div>
+
       </div>
     </div>
   );

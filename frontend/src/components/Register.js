@@ -7,46 +7,28 @@ const Register = ({ setAuthToken }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [honeypot, setHoneypot] = useState(''); // Honeypot field
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Trim input values to remove spaces before and after
-    const trimmedEmail = email.trim();
-    const trimmedUsername = username.trim();
-    const trimmedPassword = password.trim();
-
-    // Username and password validation patterns
-const usernamePattern = /^[a-zA-Z0-9]{3,20}$/;  // Only letters and numbers, length 3 to 20
-const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,50}$/;  // Password requirements, length 8 to 50
-
-
-   // Validate the fields
-if (!trimmedEmail || !trimmedUsername || !trimmedPassword) {
-  setError('All fields are required.');
-  return;
-}
-if (!usernamePattern.test(trimmedUsername)) {
-  setError('Username must be 3 to 20 characters long and contain only letters and numbers.');
-  return;
-}
-if (!passwordPattern.test(trimmedPassword)) {
-  setError('Password must be 8 to 50 characters long, contain uppercase, lowercase, number, and special character.');
-  return;
-}
+    if (honeypot) {
+      // If honeypot field is filled, return an error to prevent registration
+      setError('Bot detected. Registration blocked.');
+      return;
+    }
 
     try {
       const response = await axios.post('http://localhost:3001/api/auth/register', {
-        email: trimmedEmail,
-        username: trimmedUsername,
-        password: trimmedPassword,
+        email: email.trim(),
+        username: username.trim(),
+        password: password.trim(),
       });
       localStorage.setItem('token', response.data.token);
       setAuthToken(response.data.token);
       navigate('/app');
     } catch (err) {
-      console.error('Registration error:', err.response?.data?.message || err.message);
       setError(err.response?.data?.message || 'Registration failed');
     }
   };
@@ -83,6 +65,18 @@ if (!passwordPattern.test(trimmedPassword)) {
             required
           />
         </div>
+        
+        {/* Honeypot Field */}
+        <div style={{ display: 'none' }}>
+          <input
+            type="text"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+            name="hp_field"
+            placeholder="Leave this field empty"
+          />
+        </div>
+
         <button type="submit">Sign Up</button>
       </form>
       <p>Already have an account? <Link to="/login">Log In</Link></p>
