@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Route, Routes, Link, useNavigate } from 'react-router-dom';
+import { Route, Routes, Link, useNavigate } from 'react-router-dom';  // Removed BrowserRouter
 import axios from 'axios';
 import Home from './components/Home';
 import Login from './components/Login';
@@ -17,7 +17,23 @@ const App = () => {
     } else {
       delete axios.defaults.headers.common['x-auth-token'];
     }
-  }, [authToken]);
+
+    // Handle token removal across tabs
+    const handleStorageChange = (event) => {
+      if (event.key === 'token' && event.newValue === null) {
+        // If the token is removed in one tab, log out in all tabs
+        setAuthToken(null);
+        navigate('/login');
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Cleanup listener on component unmount
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [authToken, navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('token'); // Clear token from local storage
