@@ -1,5 +1,8 @@
 const { Client } = require('pg'); // Make sure Client is correctly imported
-require('dotenv').config();
+// require('dotenv').config();
+const { getDbConfig } = require('./environment'); // Import the database config
+
+const dbConfig = getDbConfig(); // Retrieve config dynamically
 
 // Create a new PostgreSQL client
 const client = new Client({

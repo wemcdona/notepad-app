@@ -2,9 +2,10 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const client = require('../db');
+const { getJwtSecret } = require('../environment'); // Import the JWT secret
 const router = express.Router();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
+// const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
 
 router.post('/register', async (req, res) => {
   let { email, username, password, hp_field } = req.body;
