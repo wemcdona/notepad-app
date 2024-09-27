@@ -30,6 +30,7 @@ The application uses [Helmet](https://github.com/helmetjs/helmet) to enhance sec
 ```javascript
 const helmet = require('helmet');
 app.use(helmet());
+```
 
 ## 2. Rate Limiting with express-rate-limit
 

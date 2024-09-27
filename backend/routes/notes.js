@@ -9,7 +9,7 @@ router.post('/notes', auth, async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const insertNoteQuery = `INSERT INTO notes (user_id, title, content) VALUES ($1, $2, $3) RETURNING *`;
+    const insertNoteQuery = `INSERT INTO notes (user_id, title, content) VALUES ($1, $2, $3) RETURNING id, title, content, date`;
     const newNoteResult = await client.query(insertNoteQuery, [userId, title, content]);
     res.json(newNoteResult.rows[0]);
   } catch (error) {
@@ -23,7 +23,7 @@ router.get('/notes', auth, async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const getNotesQuery = `SELECT * FROM notes WHERE user_id = $1`;
+    const getNotesQuery = `SELECT id, title, content, date FROM notes WHERE user_id = $1`;
     const notesResult = await client.query(getNotesQuery, [userId]);
     res.json(notesResult.rows);
   } catch (error) {
@@ -41,7 +41,7 @@ router.put('/notes/:id', auth, async (req, res) => {
   try {
     const updateNoteQuery = `
       UPDATE notes SET title = $1, content = $2 
-      WHERE id = $3 AND user_id = $4 RETURNING *`;
+      WHERE id = $3 AND user_id = $4 RETURNING id, title, content, date`;
     const updatedNoteResult = await client.query(updateNoteQuery, [title, content, noteId, userId]);
 
     if (updatedNoteResult.rows.length === 0) {
@@ -61,7 +61,7 @@ router.delete('/notes/:id', auth, async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const deleteNoteQuery = `DELETE FROM notes WHERE id = $1 AND user_id = $2 RETURNING *`;
+    const deleteNoteQuery = `DELETE FROM notes WHERE id = $1 AND user_id = $2 RETURNING id`;
     const deleteNoteResult = await client.query(deleteNoteQuery, [noteId, userId]);
 
     if (deleteNoteResult.rows.length === 0) {
