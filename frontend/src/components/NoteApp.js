@@ -6,11 +6,7 @@ import 'react-markdown-editor-lite/lib/index.css';
 import ReactMarkdown from 'react-markdown';
 import '../App.css';
 
-// const mdParser = new MarkdownIt();
-const mdParser = new MarkdownIt({
-  html: true,  // Enable HTML parsing in markdown
-});
-
+const mdParser = new MarkdownIt();
 
 const NoteApp = () => {
   const [notes, setNotes] = useState([]);
@@ -52,8 +48,7 @@ const NoteApp = () => {
         setNotes(prevNotes => [...prevNotes, newNote]);
         setNotification(`Note "${newNote.title}" added to your memories`);
         setTimeout(() => setNotification(''), 3000);
-        setNote({ title: '', content: '' });
-        setSelectedNote(newNote);
+        setSelectedNote(newNote); // Keep the title and content after adding the note
         setError('');
       })
       .catch(error => {
@@ -71,7 +66,7 @@ const NoteApp = () => {
     axios.put(`http://localhost:3001/api/notes/${id}`, note)
       .then(response => {
         setNotes(prevNotes => prevNotes.map(n => n.id === id ? response.data : n));
-        setSelectedNote(response.data);
+        setSelectedNote(response.data); // Keep the title and content after updating the note
         setNotification('Note updated successfully');
         setTimeout(() => setNotification(''), 3000);
         setError('');
@@ -86,10 +81,8 @@ const NoteApp = () => {
     axios.delete(`http://localhost:3001/api/notes/${id}`)
       .then(() => {
         setNotes(prevNotes => prevNotes.filter(n => n.id !== id));
-        if (selectedNote && selectedNote.id === id) {
-          setSelectedNote(null);
-          setNote({ title: '', content: '' });
-        }
+        setSelectedNote(null);
+        setNote({ title: '', content: '' }); // Clear the title and content after deleting the note
         setNotification('Note deleted successfully');
         setTimeout(() => setNotification(''), 3000);
       })
@@ -153,11 +146,10 @@ const NoteApp = () => {
             <button onClick={() => deleteNote(selectedNote.id)}>Delete Note</button>
           </div>
         )}
-       <div className="preview">
-  <h2>Preview</h2>
-  <ReactMarkdown components={{ html: true }}>{note.content}</ReactMarkdown>
-</div>
-
+        <div className="preview">
+          <h2>Preview</h2>
+          <ReactMarkdown>{note.content}</ReactMarkdown>
+        </div>
       </div>
     </div>
   );
